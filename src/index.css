@@ -4,7 +4,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Apply Outfit font to all elements */
+* {
+  font-family: "Outfit", sans-serif;
+}
 
-*{
-  font-family: Outfit;
+/* Light Mode (Default) */
+body {
+  background-color: white;
+  color: black;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Dark Mode */
+.dark {
+  background-color: #111;
+  color: white;
+}
+
+.dark .dark-mode-content {
+  background-color: #111; /* Dark background */
+  color: white; /* Light text */
+}
+
+/* Keep Header and Footer Light */
+.header, .footer {
+  background-color: white !important;
+  color: black !important;
 }
