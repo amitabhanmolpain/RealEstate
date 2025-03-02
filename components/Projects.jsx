@@ -9,7 +9,7 @@ const Projects = () => {
     useEffect(() => {
         const updateCardsToShow = () => {
             if (window.innerWidth >= 1024) {
-                setCardsToShow(projectsData.length);
+                setCardsToShow(projectsData.length + 1); // Include "See More" card
             } else {
                 setCardsToShow(1);
             }
@@ -21,11 +21,11 @@ const Projects = () => {
     }, []);
 
     const nextProject = () => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % projectsData.length);
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % (projectsData.length + 1)); // Include "See More"
     };
 
     const prevProject = () => {
-        setCurrentIndex((prevIndex) => prevIndex === 0 ? projectsData.length - 1 : prevIndex - 1);
+        setCurrentIndex((prevIndex) => (prevIndex === 0 ? projectsData.length : prevIndex - 1));
     };
 
     return (
@@ -48,7 +48,7 @@ const Projects = () => {
             {/* Wrapper for Slider & Buttons */}
             <div className='relative flex items-center justify-center group'>
 
-                {/* Left Arrow Button (Pink Background) */}
+                {/* Left Arrow Button */}
                 <button 
                     onClick={prevProject}
                     className='absolute left-0 md:-left-16 top-1/2 transform -translate-y-1/2 bg-red-300 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-red-400'
@@ -65,10 +65,10 @@ const Projects = () => {
                         {projectsData.map((project, index) => (
                             <div key={index} className='relative flex-shrink-0 w-full sm:w-1/4'>
                                 {/* Image */}
-                                <img src={project.image} alt={project.title} className='w-full h-auto mb-14' />
+                                <img src={project.image} alt={project.title} className='w-full h-auto mb-16' />
 
                                 {/* Project Info */}
-                                <div className='absolute left-0 right-0 bottom-5 flex justify-center'>
+                                <div className='absolute left-0 right-0 bottom-2 flex justify-center'>
                                     <div className='inline-block bg-white w-3/4 px-4 py-2 shadow-md'>
                                         <h2 className='text-xl font-semibold text-gray-800'>
                                             {project.title}
@@ -80,10 +80,24 @@ const Projects = () => {
                                 </div>
                             </div>
                         ))}
+
+                        {/* See More Card (Shifted Left) */}
+                        <div 
+                            className='relative flex-shrink-0 w-full sm:w-1/4 h-80 flex items-center justify-center bg-red-300 text-white text-xl font-semibold cursor-pointer ml-[-20px]'
+                            onClick={() => alert('Development in process')}
+                        >
+                            <motion.p 
+                                className='text-2xl'
+                                whileHover={{ scale: 1.1 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                See More →
+                            </motion.p>
+                        </div>
                     </div>
                 </div>
 
-                {/* Right Arrow Button (Pink Background) */}
+                {/* Right Arrow Button */}
                 <button 
                     onClick={nextProject}
                     className='absolute right-0 md:-right-16 top-1/2 transform -translate-y-1/2 bg-red-300 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-red-400'
