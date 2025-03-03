@@ -92,7 +92,7 @@ const About = () => {
           </div>
 
           <p className="my-10 max-w-lg">
-          At Estate , we are revolutionizing the way people make real estate decisions. Our cutting-edge Real Estate House Predictor System combines data-driven analytics, AI-powered insights, and market trends to provide precise property value predictions, helping buyers, sellers, and investors make informed choices.
+          At  Elsyian Estates  , we are revolutionizing the way people make real estate decisions. Our cutting-edge Real Estate House Predictor System combines data-driven analytics, AI-powered insights, and market trends to provide precise property value predictions, helping buyers, sellers, and investors make informed choices.
           </p>
 
           <button className="bg-red-300 text-white px-8 py-2 rounded hover:bg-red-400">
