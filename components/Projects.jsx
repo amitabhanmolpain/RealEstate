@@ -83,7 +83,7 @@ const Projects = () => {
 
                         {/* See More Card (Shifted Left) */}
                         <div 
-                            className='relative flex-shrink-0 w-full sm:w-1/4 h-85 flex items-center justify-center bg-red-300 text-white text-xl font-semibold cursor-pointer ml-[-20px]'
+                            className='relative flex-shrink-0 w-full sm:w-1/4 h-80 flex items-center justify-center bg-red-300 text-white text-xl font-semibold cursor-pointer ml-[-20px]'
                             onClick={() => alert('Development in process')}
                         >
                             <motion.p 
