@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../src/contexts/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const AuthModal = ({ isOpen, onClose }) => {
   const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState('signup'); // 'signup' | 'signin'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,6 +32,7 @@ const AuthModal = ({ isOpen, onClose }) => {
         await signInWithEmail(email, password);
       }
       onClose();
+      navigate('/dashboard');
     } catch (err) {
       setError(err?.message || 'Something went wrong');
     } finally {
@@ -41,8 +44,9 @@ const AuthModal = ({ isOpen, onClose }) => {
     setError('');
     setLoading(true);
     try {
-      await signInWithGoogle();
-      onClose();
+  await signInWithGoogle();
+  onClose();
+  navigate('/dashboard');
     } catch (err) {
       setError(err?.message || 'Google sign-in failed');
     } finally {
