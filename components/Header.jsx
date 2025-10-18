@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 import { motion } from "framer-motion";
 import header_img from "../assets/header_img.png";
 
-const Header = () => {
+const Header = ({ onOpenAuthModal }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -30,8 +30,8 @@ const Header = () => {
         }`}
       ></div>
 
-      {/* Pass down the showMobileMenu state */}
-      <Navbar showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} />
+  {/* Pass down the showMobileMenu state */}
+  <Navbar showMobileMenu={showMobileMenu} setShowMobileMenu={setShowMobileMenu} onOpenAuthModal={onOpenAuthModal} />
 
       <motion.div
         initial={{ opacity: 0, y: 100 }}

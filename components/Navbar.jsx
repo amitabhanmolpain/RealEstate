@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { assets } from "../assets/assets";
 
-const Navbar = ({ showMobileMenu, setShowMobileMenu }) => {
+const Navbar = ({ showMobileMenu, setShowMobileMenu, onOpenAuthModal }) => {
   useEffect(() => {
     document.body.style.overflow = showMobileMenu ? "hidden" : "auto";
     return () => {
@@ -45,7 +45,7 @@ const Navbar = ({ showMobileMenu, setShowMobileMenu }) => {
 
         {!showMobileMenu && (
           <button
-            onClick={() => scrollToSection("#Contact")}
+            onClick={onOpenAuthModal}
             className="hidden md:block bg-white px-8 py-2 rounded-full hover:bg-red-300"
           >
             Sign up
