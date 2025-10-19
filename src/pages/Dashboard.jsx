@@ -3,6 +3,8 @@ import DashboardNavbar from '../../components/DashboardNavbar.jsx';
 import SearchBar from '../../components/SearchBar.jsx';
 import PropertyFilters from '../../components/PropertyFilters.jsx';
 import PropertyCard from '../../components/PropertyCard.jsx';
+import PropertyStats from '../../components/PropertyStats.jsx';
+import Pagination from '../../components/Pagination.jsx';
 import { properties } from '../data/properties.js';
 import { applySearchAndFilters } from '../utils/searchHelpers.js';
 
@@ -15,11 +17,40 @@ const Dashboard = () => {
     type: null
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(9);
+  const [sortBy, setSortBy] = useState('newest');
 
   // Apply search and filters
   const filteredProperties = useMemo(() => {
-    return applySearchAndFilters(properties, searchQuery, filters);
-  }, [searchQuery, filters]);
+    let results = applySearchAndFilters(properties, searchQuery, filters);
+    
+    // Apply sorting
+    switch(sortBy) {
+      case 'price-low':
+        results = [...results].sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        results = [...results].sort((a, b) => b.price - a.price);
+        break;
+      case 'newest':
+        results = [...results].sort((a, b) => new Date(b.postedDate) - new Date(a.postedDate));
+        break;
+      case 'featured':
+        results = [...results].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+        break;
+      default:
+        break;
+    }
+    
+    return results;
+  }, [searchQuery, filters, sortBy]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProperties = filteredProperties.slice(startIndex, endIndex);
 
   const handleClearFilters = () => {
     setFilters({
@@ -29,6 +60,18 @@ const Dashboard = () => {
       type: null
     });
     setSearchQuery('');
+    setSortBy('newest');
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
   };
 
   return (
@@ -41,6 +84,9 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Find Your Dream Property</h1>
           <p className="text-gray-600">Explore {properties.length} premium properties across India</p>
         </div>
+
+        {/* Stats */}
+        <PropertyStats properties={properties} />
 
         {/* Search Bar */}
         <div className="mb-6">
@@ -75,18 +121,49 @@ const Dashboard = () => {
 
           {/* Properties Grid */}
           <div className="lg:col-span-3">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <p className="text-gray-600">
                 {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'} found
               </p>
+              
+              {/* Sort Dropdown */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="featured">Featured First</option>
+                </select>
+              </div>
             </div>
 
             {filteredProperties.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {currentProperties.map((property) => (
+                    <PropertyCard key={property.id} property={property} />
+                  ))}
+                </div>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={handleItemsPerPageChange}
+                  />
+                )}
+              </>
             ) : (
               <div className="bg-white rounded-xl shadow-md p-12 text-center">
                 <svg className="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
