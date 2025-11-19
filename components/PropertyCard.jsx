@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const PropertyCard = ({ property }) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const navigate = useNavigate();
 
   const formatPrice = (price) => {
     if (price >= 10000000) {
@@ -12,8 +14,25 @@ const PropertyCard = ({ property }) => {
     return `₹${price.toLocaleString('en-IN')}`;
   };
 
+  const handleCardClick = () => {
+    navigate(`/property/${property.id}`);
+  };
+
+  const handleViewDetails = (e) => {
+    e.stopPropagation();
+    navigate(`/property/${property.id}`);
+  };
+
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
+    <div 
+      onClick={handleCardClick}
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden group cursor-pointer"
+    >
       {/* Property Image */}
       <div className="relative h-56 overflow-hidden">
         <img
@@ -44,7 +63,7 @@ const PropertyCard = ({ property }) => {
 
         <div className="absolute top-3 right-3 flex gap-2">
           <button
-            onClick={() => setIsFavorite(!isFavorite)}
+            onClick={handleFavoriteClick}
             className="bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition"
           >
             <svg
@@ -97,7 +116,10 @@ const PropertyCard = ({ property }) => {
               {formatPrice(property.price)}
             </p>
           </div>
-          <button className="bg-red-300 hover:bg-red-400 text-black font-medium px-4 py-2 rounded-lg transition">
+          <button 
+            onClick={handleViewDetails}
+            className="bg-red-300 hover:bg-red-400 text-black font-medium px-4 py-2 rounded-lg transition"
+          >
             View Details
           </button>
         </div>

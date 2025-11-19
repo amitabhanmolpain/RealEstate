@@ -10,6 +10,7 @@ import Header from '../components/Header.jsx'
 import AuthModal from '../components/AuthModal.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Dashboard from './pages/Dashboard.jsx'
+import PropertyDetail from './pages/PropertyDetail.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 
@@ -35,6 +36,11 @@ const App = () => {
           <Route path='/dashboard' element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path='/property/:id' element={
+            <ProtectedRoute>
+              <PropertyDetail />
             </ProtectedRoute>
           } />
         </Routes>
