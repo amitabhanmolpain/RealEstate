@@ -3,7 +3,6 @@ import DashboardNavbar from '../../components/DashboardNavbar.jsx';
 import SearchBar from '../../components/SearchBar.jsx';
 import PropertyFilters from '../../components/PropertyFilters.jsx';
 import PropertyCard from '../../components/PropertyCard.jsx';
-import PropertyStats from '../../components/PropertyStats.jsx';
 import Pagination from '../../components/Pagination.jsx';
 import { properties } from '../data/properties.js';
 import { applySearchAndFilters } from '../utils/searchHelpers.js';
@@ -84,9 +83,6 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Find Your Dream Property</h1>
           <p className="text-gray-600">Explore {properties.length} premium properties across India</p>
         </div>
-
-        {/* Stats */}
-        <PropertyStats properties={properties} />
 
         {/* Search Bar */}
         <div className="mb-6">

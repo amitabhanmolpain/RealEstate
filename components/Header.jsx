@@ -2,16 +2,29 @@ import React, { useState } from "react";
 import Navbar from "./Navbar";
 import { motion } from "framer-motion";
 import header_img from "../assets/header_img.png";
+import { useAuth } from "../src/contexts/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ onOpenAuthModal }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Smooth scroll function
   const scrollToSection = (id) => {
     const section = document.querySelector(id);
     if (section) {
       window.scrollTo({ top: section.offsetTop, behavior: "smooth" });
+    }
+  };
+
+  // Handle Get Started button click
+  const handleGetStartedClick = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      onOpenAuthModal();
     }
   };
 
@@ -57,13 +70,13 @@ const Header = ({ onOpenAuthModal }) => {
             Projects
           </button>
 
-          {/* Hide "Contact Us" button when mobile menu is open */}
+          {/* Hide "Get Started" button when mobile menu is open */}
           {!showMobileMenu && (
             <button
-              onClick={() => scrollToSection("#Contact")}
+              onClick={handleGetStartedClick}
               className="bg-red-300 px-8 py-3 rounded transition duration-300 hover:bg-red-400"
             >
-              Contact Us
+              Get Started
             </button>
           )}
         </div>
