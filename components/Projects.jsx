@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { assets, projectsData } from '../assets/assets';
 import { motion } from 'framer-motion';
+import { useAuth } from '../src/contexts/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 const Projects = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [cardsToShow, setCardsToShow] = useState(1);
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const updateCardsToShow = () => {
@@ -26,6 +30,15 @@ const Projects = () => {
 
     const prevProject = () => {
         setCurrentIndex((prevIndex) => (prevIndex === 0 ? projectsData.length : prevIndex - 1));
+    };
+
+    // Handle See More button click
+    const handleSeeMoreClick = () => {
+        if (user) {
+            navigate('/dashboard');
+        } else {
+            alert('Please sign in to view more properties');
+        }
     };
 
     return (
@@ -84,7 +97,7 @@ const Projects = () => {
                         {/* See More Card (Shifted Left) */}
                         <div 
                             className='relative flex-shrink-0 w-full sm:w-1/4 h-80 flex items-center justify-center bg-red-300 text-white text-xl font-semibold cursor-pointer ml-[-20px]'
-                            onClick={() => alert('Development in process')}
+                            onClick={handleSeeMoreClick}
                         >
                             <motion.p 
                                 className='text-2xl'
