@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import PropertyDetail from './pages/PropertyDetail.jsx'
 import Interests from './pages/Interests.jsx'
 import AddProperty from './pages/AddProperty.jsx'
+import SellerDashboard from './pages/SellerDashboard.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 
@@ -53,6 +54,11 @@ const App = () => {
           <Route path='/add-property' element={
             <ProtectedRoute>
               <AddProperty />
+            </ProtectedRoute>
+          } />
+          <Route path='/seller-dashboard' element={
+            <ProtectedRoute>
+              <SellerDashboard />
             </ProtectedRoute>
           } />
         </Routes>

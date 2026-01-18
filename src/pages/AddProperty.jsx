@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DashboardNavbar from '../../components/DashboardNavbar.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import { sellerService } from '../services/sellerService.js';
 
 const AddProperty = () => {
   const { user } = useAuth();
@@ -105,27 +106,30 @@ const AddProperty = () => {
       return;
     }
 
-    // TODO: Submit to backend API when ready
-    console.log('Property data to submit:', formData);
-    alert('Property listing submitted successfully! (Frontend only - Backend integration coming soon)');
-    setIsSubmitting(false);
+    try {
+      // Prepare data for API
+      const propertyData = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        city: formData.city,
+        property_type: formData.propertyType,
+        price: parseInt(formData.price),
+        area: parseInt(formData.area),
+        bedrooms: parseInt(formData.bedrooms),
+        bathrooms: parseInt(formData.bathrooms),
+        image: formData.image,
+        amenities: formData.amenities,
+      };
 
-    // Reset form
-    setFormData({
-      title: '',
-      description: '',
-      location: '',
-      city: '',
-      propertyType: 'Rent',
-      price: '',
-      area: '',
-      bedrooms: '',
-      bathrooms: '',
-      image: '',
-      amenities: [],
-      featured: false,
-      available: true,
-    });
+      await sellerService.createProperty(propertyData);
+      alert('Property listed successfully!');
+      navigate('/seller-dashboard');
+    } catch (error) {
+      alert('Failed to list property: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

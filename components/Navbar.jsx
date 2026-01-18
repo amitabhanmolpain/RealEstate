@@ -53,7 +53,13 @@ const Navbar = ({ showMobileMenu, setShowMobileMenu, onOpenAuthModal }) => {
         </ul>
 
         {!showMobileMenu && (
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-4">
+            <button
+              onClick={handleSignInClick}
+              className="bg-red-400 text-white px-6 py-2 rounded-full hover:bg-red-500 transition duration-300 font-medium"
+            >
+              List Your Property
+            </button>
             <button
               onClick={handleSignInClick}
               className="bg-white px-8 py-2 rounded-full hover:bg-red-300 transition duration-300"
@@ -83,13 +89,24 @@ const Navbar = ({ showMobileMenu, setShowMobileMenu, onOpenAuthModal }) => {
         </div>
 
         <ul className="flex flex-col items-center gap-4 mt-5 px-5 text-lg font-medium">
+          <li className="mb-2">
+            <button
+              onClick={() => {
+                handleSignInClick();
+                setShowMobileMenu(false);
+              }}
+              className="bg-red-400 px-6 py-2 rounded-full text-white hover:bg-red-500 font-medium"
+            >
+              List Your Property
+            </button>
+          </li>
           <li className="mb-4">
             <button
               onClick={() => {
                 handleSignInClick();
                 setShowMobileMenu(false);
               }}
-              className="bg-red-300 px-6 py-2 rounded-full text-white hover:bg-red-400"
+              className="bg-gray-200 px-6 py-2 rounded-full text-gray-800 hover:bg-gray-300"
             >
               Sign In
             </button>

@@ -67,10 +67,10 @@ const DashboardNavbar = () => {
               Properties
             </button>
             <button
-              onClick={() => navigate('/add-property')}
+              onClick={() => navigate('/seller-dashboard')}
               className="text-gray-700 hover:text-red-400 font-medium transition"
             >
-              List Your Property
+              My Listings
             </button>
           </div>
 
@@ -103,10 +103,18 @@ const DashboardNavbar = () => {
               </div>
             </div>
 
+            {/* List Your Property Button */}
+            <button
+              onClick={() => navigate('/seller-dashboard')}
+              className="ml-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white font-medium rounded-lg transition"
+            >
+              List Your Property
+            </button>
+
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="ml-2 px-4 py-2 bg-red-300 hover:bg-red-400 text-black font-medium rounded-lg transition"
+              className="ml-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition"
             >
               Logout
             </button>
