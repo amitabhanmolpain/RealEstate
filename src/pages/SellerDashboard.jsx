@@ -7,6 +7,7 @@ import { sellerService } from '../services/sellerService.js';
 const SellerDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('properties'); // properties, interests, visits
   const [stats, setStats] = useState({
     total_properties: 0,
     total_likes: 0,
@@ -17,6 +18,8 @@ const SellerDashboard = () => {
   });
   const [myProperties, setMyProperties] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [interestedUsers, setInterestedUsers] = useState([]);
+  const [scheduledVisits, setScheduledVisits] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -39,6 +42,18 @@ const SellerDashboard = () => {
         const activityResponse = await sellerService.getRecentActivity(5);
         if (activityResponse.activities) {
           setRecentActivity(activityResponse.activities);
+        }
+
+        // Fetch interested users
+        const interestsResponse = await sellerService.getInterests();
+        if (interestsResponse.interests) {
+          setInterestedUsers(interestsResponse.interests);
+        }
+
+        // Fetch scheduled visits
+        const visitsResponse = await sellerService.getVisits();
+        if (visitsResponse.visits) {
+          setScheduledVisits(visitsResponse.visits);
         }
       } catch (error) {
         console.error('Error fetching seller data:', error);
@@ -117,16 +132,18 @@ const SellerDashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            icon={
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            }
-            label="My Properties"
-            value={stats.total_properties || 0}
-            color="bg-blue-500"
-          />
+          <div onClick={() => setActiveTab('properties')} className="cursor-pointer">
+            <StatCard
+              icon={
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              }
+              label="My Properties"
+              value={stats.total_properties || 0}
+              color="bg-blue-500"
+            />
+          </div>
           <StatCard
             icon={
               <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -137,29 +154,56 @@ const SellerDashboard = () => {
             value={stats.total_likes || 0}
             color="bg-red-400"
           />
-          <StatCard
-            icon={
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            }
-            label="Users Interested"
-            value={stats.total_interests || 0}
-            color="bg-green-500"
-          />
-          <StatCard
-            icon={
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-            }
-            label="Scheduled Visits"
-            value={stats.total_visits || 0}
-            color="bg-purple-500"
-          />
+          <div onClick={() => setActiveTab('interests')} className="cursor-pointer">
+            <StatCard
+              icon={
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              }
+              label="Users Interested"
+              value={stats.total_interests || 0}
+              color="bg-green-500"
+            />
+          </div>
+          <div onClick={() => setActiveTab('visits')} className="cursor-pointer">
+            <StatCard
+              icon={
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              }
+              label="Scheduled Visits"
+              value={stats.total_visits || 0}
+              color="bg-purple-500"
+            />
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-4 mb-6 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab('properties')}
+            className={`pb-3 px-2 font-medium transition ${activeTab === 'properties' ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            My Properties
+          </button>
+          <button
+            onClick={() => setActiveTab('interests')}
+            className={`pb-3 px-2 font-medium transition ${activeTab === 'interests' ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Interested Users ({interestedUsers.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('visits')}
+            className={`pb-3 px-2 font-medium transition ${activeTab === 'visits' ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Scheduled Visits ({scheduledVisits.length})
+          </button>
         </div>
 
         {/* Properties Section */}
+        {activeTab === 'properties' && (
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-800">My Listed Properties</h2>
@@ -287,6 +331,151 @@ const SellerDashboard = () => {
             </div>
           )}
         </div>
+        )}
+
+        {/* Interested Users Section */}
+        {activeTab === 'interests' && (
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">Users Interested in Your Properties</h2>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-400"></div>
+              </div>
+            ) : interestedUsers.length === 0 ? (
+              <div className="text-center py-12">
+                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-800 mb-2">No Interested Users Yet</h3>
+                <p className="text-gray-500">Users who click "Request Info" will appear here</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 text-gray-600 font-medium">User</th>
+                      <th className="text-left py-3 px-4 text-gray-600 font-medium">Property</th>
+                      <th className="text-left py-3 px-4 text-gray-600 font-medium">Message</th>
+                      <th className="text-center py-3 px-4 text-gray-600 font-medium">Date</th>
+                      <th className="text-center py-3 px-4 text-gray-600 font-medium">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {interestedUsers.map((interest) => (
+                      <tr key={interest.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-4 px-4">
+                          <div>
+                            <p className="font-medium text-gray-800">{interest.user_name || 'Anonymous'}</p>
+                            <p className="text-sm text-gray-500">{interest.user_email || 'No email'}</p>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <p className="text-gray-800">{interest.property_title || 'Property'}</p>
+                        </td>
+                        <td className="py-4 px-4">
+                          <p className="text-sm text-gray-600 max-w-xs truncate">
+                            {interest.message || 'No message'}
+                          </p>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <p className="text-sm text-gray-500">
+                            {interest.created_at ? new Date(interest.created_at).toLocaleDateString() : 'N/A'}
+                          </p>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            interest.status === 'contacted' ? 'bg-green-100 text-green-600' :
+                            interest.status === 'pending' ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-gray-100 text-gray-600'
+                          }`}>
+                            {interest.status || 'New'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Scheduled Visits Section */}
+        {activeTab === 'visits' && (
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">Scheduled Property Visits</h2>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-400"></div>
+              </div>
+            ) : scheduledVisits.length === 0 ? (
+              <div className="text-center py-12">
+                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 className="text-lg font-medium text-gray-800 mb-2">No Scheduled Visits Yet</h3>
+                <p className="text-gray-500">Users who schedule visits will appear here</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 text-gray-600 font-medium">Visitor</th>
+                      <th className="text-left py-3 px-4 text-gray-600 font-medium">Property</th>
+                      <th className="text-center py-3 px-4 text-gray-600 font-medium">Date</th>
+                      <th className="text-center py-3 px-4 text-gray-600 font-medium">Time</th>
+                      <th className="text-left py-3 px-4 text-gray-600 font-medium">Address</th>
+                      <th className="text-center py-3 px-4 text-gray-600 font-medium">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {scheduledVisits.map((visit) => (
+                      <tr key={visit.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-4 px-4">
+                          <div>
+                            <p className="font-medium text-gray-800">{visit.visitor_name || 'Anonymous'}</p>
+                            <p className="text-sm text-gray-500">{visit.visitor_email || 'No email'}</p>
+                            {visit.visitor_phone && (
+                              <p className="text-sm text-gray-500">{visit.visitor_phone}</p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <p className="text-gray-800">{visit.property_title || 'Property'}</p>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <p className="font-medium text-gray-800">
+                            {visit.visit_date ? new Date(visit.visit_date).toLocaleDateString() : 'N/A'}
+                          </p>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <p className="text-gray-600">{visit.visit_time || 'N/A'}</p>
+                        </td>
+                        <td className="py-4 px-4">
+                          <p className="text-sm text-gray-600 max-w-xs truncate">
+                            {visit.visit_address || 'Property address'}
+                          </p>
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            visit.status === 'confirmed' ? 'bg-green-100 text-green-600' :
+                            visit.status === 'completed' ? 'bg-blue-100 text-blue-600' :
+                            visit.status === 'cancelled' ? 'bg-red-100 text-red-600' :
+                            'bg-yellow-100 text-yellow-600'
+                          }`}>
+                            {visit.status || 'Pending'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Quick Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">

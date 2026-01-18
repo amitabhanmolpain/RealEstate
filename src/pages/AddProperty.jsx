@@ -19,6 +19,7 @@ const AddProperty = () => {
     bedrooms: '',
     bathrooms: '',
     image: '',
+    images: [], // Additional images
     amenities: [],
     featured: false,
     available: true,
@@ -119,6 +120,7 @@ const AddProperty = () => {
         bedrooms: parseInt(formData.bedrooms),
         bathrooms: parseInt(formData.bathrooms),
         image: formData.image,
+        images: formData.images.filter(img => img.trim() !== ''), // Additional images
         amenities: formData.amenities,
       };
 
@@ -316,11 +318,12 @@ const AddProperty = () => {
 
             {/* Image Section */}
             <div className="border-b pb-8">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Property Image</h2>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">Property Images</h2>
 
-              <div>
+              {/* Main Image */}
+              <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Image URL *
+                  Main Image URL *
                 </label>
                 <input
                   type="url"
@@ -333,16 +336,93 @@ const AddProperty = () => {
                 />
                 {formData.image && (
                   <div className="mt-4">
-                    <p className="text-sm text-gray-600 mb-2">Preview:</p>
+                    <p className="text-sm text-gray-600 mb-2">Main Image Preview:</p>
                     <img
                       src={formData.image}
-                      alt="Property preview"
-                      className="w-full md:w-64 h-48 object-cover rounded-lg"
+                      alt="Main property preview"
+                      className="w-full md:w-64 h-48 object-cover rounded-lg border-2 border-red-300"
                       onError={(e) => {
                         e.target.src =
                           'https://images.unsplash.com/photo-1570129477492-45ef003a1b47?w=500&h=500&fit=crop';
                       }}
                     />
+                  </div>
+                )}
+              </div>
+
+              {/* Additional Images */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Additional Images (Optional)
+                </label>
+                <p className="text-xs text-gray-500 mb-3">Add more images to showcase your property</p>
+                
+                {/* Existing additional images */}
+                {formData.images.map((imgUrl, index) => (
+                  <div key={index} className="flex items-center gap-2 mb-3">
+                    <input
+                      type="url"
+                      value={imgUrl}
+                      onChange={(e) => {
+                        const newImages = [...formData.images];
+                        newImages[index] = e.target.value;
+                        setFormData({ ...formData, images: newImages });
+                      }}
+                      placeholder="https://example.com/additional-image.jpg"
+                      className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newImages = formData.images.filter((_, i) => i !== index);
+                        setFormData({ ...formData, images: newImages });
+                      }}
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                      title="Remove image"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add new image button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData({ ...formData, images: [...formData.images, ''] });
+                  }}
+                  className="flex items-center gap-2 text-red-400 hover:text-red-500 font-medium mt-2 px-4 py-2 border border-dashed border-red-300 rounded-lg hover:bg-red-50 transition w-full justify-center"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Another Image
+                </button>
+
+                {/* Preview additional images */}
+                {formData.images.filter(img => img.trim() !== '').length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600 mb-2">Additional Images Preview:</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {formData.images.filter(img => img.trim() !== '').map((imgUrl, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={imgUrl}
+                            alt={`Additional ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                            onError={(e) => {
+                              e.target.src =
+                                'https://images.unsplash.com/photo-1570129477492-45ef003a1b47?w=500&h=500&fit=crop';
+                            }}
+                          />
+                          <span className="absolute top-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                            #{index + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

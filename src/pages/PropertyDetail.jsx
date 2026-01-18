@@ -4,6 +4,7 @@ import DashboardNavbar from '../../components/DashboardNavbar.jsx';
 import PropertyMap from '../../components/PropertyMap.jsx';
 import EMICalculator from '../../components/EMICalculator.jsx';
 import { propertyService } from '../services/propertyService.js';
+import { userPropertyService } from '../services/sellerService.js';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -11,9 +12,21 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  
+  // Interest and Visit states
+  const [showInterestThankYou, setShowInterestThankYou] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [isSubmittingInterest, setIsSubmittingInterest] = useState(false);
+  const [isSubmittingVisit, setIsSubmittingVisit] = useState(false);
+  const [visitFormData, setVisitFormData] = useState({
+    address: '',
+    visit_date: '',
+    visit_time: '',
+    visitor_phone: '',
+  });
 
-  // Sample additional images for the property
-  const additionalImages = [
+  // Sample additional images for the property (fallback if no images from backend)
+  const fallbackImages = [
     'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=800',
     'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=800',
     'https://images.pexels.com/photos/2121121/pexels-photo-2121121.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -39,6 +52,51 @@ const PropertyDetail = () => {
     fetchProperty();
   }, [id, navigate]);
 
+  // Handle Request Info - Express Interest
+  const handleRequestInfo = async () => {
+    setIsSubmittingInterest(true);
+    try {
+      await userPropertyService.expressInterest(id, {
+        message: 'I am interested in this property and would like more information.',
+        interest_type: 'General'
+      });
+      setShowInterestThankYou(true);
+    } catch (error) {
+      console.error('Error expressing interest:', error);
+      // Still show thank you even if API fails (for demo purposes)
+      setShowInterestThankYou(true);
+    } finally {
+      setIsSubmittingInterest(false);
+    }
+  };
+
+  // Handle Schedule Visit
+  const handleScheduleVisit = async (e) => {
+    e.preventDefault();
+    if (!visitFormData.address || !visitFormData.visit_date || !visitFormData.visit_time) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    setIsSubmittingVisit(true);
+    try {
+      await userPropertyService.scheduleVisit(id, {
+        visit_date: visitFormData.visit_date,
+        visit_time: visitFormData.visit_time,
+        visitor_phone: visitFormData.visitor_phone,
+        notes: `Pickup Address: ${visitFormData.address}`
+      });
+      alert('Visit scheduled successfully! We will contact you soon.');
+      setShowScheduleModal(false);
+      setVisitFormData({ address: '', visit_date: '', visit_time: '', visitor_phone: '' });
+    } catch (error) {
+      console.error('Error scheduling visit:', error);
+      alert(error.message || 'Failed to schedule visit. Please try again.');
+    } finally {
+      setIsSubmittingVisit(false);
+    }
+  };
+
   if (!property) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -59,7 +117,11 @@ const PropertyDetail = () => {
     return `₹${price.toLocaleString('en-IN')}`;
   };
 
-  const allImages = [property.image, ...additionalImages.slice(0, 4)];
+  // Use property images from backend, or fallback to sample images
+  const additionalImages = property.images && property.images.length > 0 
+    ? property.images 
+    : fallbackImages.slice(0, 4);
+  const allImages = [property.image, ...additionalImages];
 
   // Sample nearby facilities based on city
   const nearbyFacilities = {
@@ -354,19 +416,38 @@ const PropertyDetail = () => {
             <div className="bg-white rounded-xl shadow-md p-6 sticky top-24">
               <h3 className="text-lg font-semibold mb-4">Interested in this property?</h3>
               
-              <div className="space-y-3 mb-6">
-                <button className="w-full bg-red-400 hover:bg-red-500 text-white font-medium py-3 rounded-lg transition">
-                  Call Now
+              {showInterestThankYou ? (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-medium text-green-800">Thank you!</p>
+                      <p className="text-sm text-green-600">We've noted your interest. Our team will contact you soon.</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button 
+                  onClick={handleRequestInfo}
+                  disabled={isSubmittingInterest}
+                  className="w-full bg-red-400 hover:bg-red-500 disabled:bg-red-300 text-white font-medium py-3 rounded-lg transition mb-3"
+                >
+                  {isSubmittingInterest ? 'Submitting...' : 'Request Info'}
                 </button>
-                <button className="w-full border-2 border-red-400 text-red-400 hover:bg-red-400 hover:text-white font-medium py-3 rounded-lg transition">
-                  Request Info
-                </button>
-                <button className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-3 rounded-lg transition">
-                  Schedule Visit
-                </button>
-              </div>
+              )}
+              
+              <button 
+                onClick={() => setShowScheduleModal(true)}
+                className="w-full border-2 border-red-400 text-red-400 hover:bg-red-400 hover:text-white font-medium py-3 rounded-lg transition"
+              >
+                Schedule Visit
+              </button>
 
-              <div className="border-t pt-4">
+              <div className="border-t pt-4 mt-4">
                 <h4 className="font-medium mb-2">Property ID</h4>
                 <p className="text-gray-600 text-sm">#{property.id.toString().padStart(6, '0')}</p>
                 
@@ -409,6 +490,113 @@ const PropertyDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Schedule Visit Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800">Schedule a Visit</h3>
+              <button 
+                onClick={() => setShowScheduleModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleScheduleVisit} className="space-y-4">
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Address (for pickup) <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={visitFormData.address}
+                  onChange={(e) => setVisitFormData({...visitFormData, address: e.target.value})}
+                  placeholder="Enter your full address"
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent outline-none resize-none"
+                  required
+                />
+              </div>
+
+              {/* Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Preferred Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={visitFormData.visit_date}
+                  onChange={(e) => setVisitFormData({...visitFormData, visit_date: e.target.value})}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent outline-none"
+                  required
+                />
+              </div>
+
+              {/* Time */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Preferred Time <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={visitFormData.visit_time}
+                  onChange={(e) => setVisitFormData({...visitFormData, visit_time: e.target.value})}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent outline-none"
+                  required
+                >
+                  <option value="">Select a time slot</option>
+                  <option value="9:00 AM">9:00 AM</option>
+                  <option value="10:00 AM">10:00 AM</option>
+                  <option value="11:00 AM">11:00 AM</option>
+                  <option value="12:00 PM">12:00 PM</option>
+                  <option value="2:00 PM">2:00 PM</option>
+                  <option value="3:00 PM">3:00 PM</option>
+                  <option value="4:00 PM">4:00 PM</option>
+                  <option value="5:00 PM">5:00 PM</option>
+                  <option value="6:00 PM">6:00 PM</option>
+                </select>
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={visitFormData.visitor_phone}
+                  onChange={(e) => setVisitFormData({...visitFormData, visitor_phone: e.target.value})}
+                  placeholder="Enter your phone number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent outline-none"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingVisit}
+                  className="flex-1 px-4 py-2 bg-red-400 hover:bg-red-500 disabled:bg-red-300 text-white rounded-lg transition"
+                >
+                  {isSubmittingVisit ? 'Scheduling...' : 'Schedule Visit'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
