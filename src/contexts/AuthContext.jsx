@@ -1,80 +1,107 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 const AuthContext = createContext(null);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 export const useAuth = () => useContext(AuthContext);
+
+const normalizeUser = (rawUser) => ({
+  id: rawUser?.id,
+  email: rawUser?.email,
+  displayName: rawUser?.name || rawUser?.displayName || rawUser?.email?.split('@')[0],
+});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Initialize user from localStorage on mount
   useEffect(() => {
+    // Only restore user if we have BOTH token AND user in storage
+    // This prevents stale login states
+    const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    
+    if (token && storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
       } catch (e) {
+        // Invalid stored data, clear everything
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
+    } else {
+      // Clear partial/invalid session
+      if (!token || !storedUser) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
       }
     }
     setLoading(false);
   }, []);
 
+  const clearSession = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+
+  const persistSession = (token, nextUser) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(nextUser));
+    setUser(nextUser);
+  };
+
+  const postJson = async (path, body) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}${path}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.message || `Request failed with status ${res.status}`);
+      }
+      return data;
+    } catch (error) {
+      console.error(`Error calling ${path}:`, error);
+      throw error;
+    }
+  };
+
   const value = useMemo(() => ({
     user,
     loading,
     signUpWithEmail: async (email, password, displayName) => {
-      // Simple validation
-      if (!email || !password || !displayName) {
-        throw new Error('Email, password, and name are required');
+      try {
+        const payload = { name: displayName, email, password };
+        const data = await postJson('/auth/register', payload);
+        const nextUser = normalizeUser(data.user);
+        persistSession(data.token, nextUser);
+        return nextUser;
+      } catch (error) {
+        clearSession();
+        throw error;
       }
-      if (password.length < 6) {
-        throw new Error('Password must be at least 6 characters');
-      }
-
-      // Check if user already exists
-      const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
-      if (existingUsers[email]) {
-        throw new Error('User already exists with this email');
-      }
-
-      // Create new user
-      const newUser = {
-        email,
-        displayName,
-        uid: Date.now().toString(),
-      };
-
-      // Store password (note: in production, never store plain passwords)
-      existingUsers[email] = { password, ...newUser };
-      localStorage.setItem('users', JSON.stringify(existingUsers));
-      localStorage.setItem('user', JSON.stringify(newUser));
-      
-      setUser(newUser);
-      return newUser;
     },
     signInWithEmail: async (email, password) => {
-      const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
-      const userRecord = existingUsers[email];
-
-      if (!userRecord || userRecord.password !== password) {
-        throw new Error('Invalid email or password');
+      try {
+        const payload = { email, password };
+        const data = await postJson('/auth/login', payload);
+        const nextUser = normalizeUser(data.user);
+        persistSession(data.token, nextUser);
+        return nextUser;
+      } catch (error) {
+        clearSession();
+        throw error;
       }
-
-      const loggedInUser = {
-        email: userRecord.email,
-        displayName: userRecord.displayName,
-        uid: userRecord.uid,
-      };
-
-      localStorage.setItem('user', JSON.stringify(loggedInUser));
-      setUser(loggedInUser);
-      return loggedInUser;
     },
     signOut: async () => {
-      localStorage.removeItem('user');
-      setUser(null);
+      clearSession();
     },
   }), [user, loading]);
 

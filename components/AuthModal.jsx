@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom';
 const AuthModal = ({ isOpen, onClose }) => {
   const { signInWithEmail, signUpWithEmail } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState('signup'); // 'signup' | 'signin'
+  const [mode, setMode] = useState('signup');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [attemptsRemaining, setAttemptsRemaining] = useState(null);
+  const [isLocked, setIsLocked] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -24,6 +26,8 @@ const AuthModal = ({ isOpen, onClose }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setAttemptsRemaining(null);
+    setIsLocked(false);
     setLoading(true);
     try {
       if (mode === 'signup') {
@@ -32,9 +36,25 @@ const AuthModal = ({ isOpen, onClose }) => {
         await signInWithEmail(email, password);
       }
       onClose();
+      setEmail('');
+      setPassword('');
+      setName('');
       navigate('/dashboard');
     } catch (err) {
-      setError(err?.message || 'Something went wrong');
+      const message = err?.message || 'Something went wrong';
+      setError(message);
+      
+      // Extract attempts remaining from message
+      if (message.includes('attempt')) {
+        const match = message.match(/(\d+)\s+attempt/);
+        if (match) {
+          setAttemptsRemaining(parseInt(match[1]));
+        }
+      }
+      
+      if (message.includes('locked')) {
+        setIsLocked(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -80,7 +100,32 @@ const AuthModal = ({ isOpen, onClose }) => {
         </div>
 
         {error && (
-          <div className="mb-3 text-sm text-red-600 bg-red-50 border border-red-200 p-2 rounded">{error}</div>
+          <div className={`mb-4 p-4 rounded-lg border ${isLocked ? 'bg-red-100 border-red-400' : 'bg-red-50 border-red-200'}`}>
+            <div className="flex items-start gap-3">
+              <div className="text-xl">
+                {isLocked ? '🔒' : '⚠️'}
+              </div>
+              <div className="flex-1">
+                <p className={`font-medium ${isLocked ? 'text-red-800' : 'text-red-700'}`}>{error}</p>
+                {attemptsRemaining !== null && !isLocked && (
+                  <div className="mt-2 space-y-2">
+                    <p className={`text-sm ${isLocked ? 'text-red-700' : 'text-red-600'}`}>
+                      <span className="font-semibold">{attemptsRemaining}</span> attempt{attemptsRemaining !== 1 ? 's' : ''} remaining
+                    </p>
+                    <div className="w-full bg-red-200 rounded-full h-1.5">
+                      <div 
+                        className="bg-red-600 h-1.5 rounded-full transition-all" 
+                        style={{ width: `${(attemptsRemaining / 5) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+                {isLocked && (
+                  <p className="text-sm text-red-700 mt-2">Your account is locked. Please try again in 15 minutes.</p>
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         <form onSubmit={onSubmit} className="space-y-3">
