@@ -19,6 +19,13 @@ const AuthModal = ({ isOpen, onClose }) => {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
+      // Clear form when closing modal
+      setEmail('');
+      setPassword('');
+      setName('');
+      setError('');
+      setAttemptsRemaining(null);
+      setIsLocked(false);
     }
     return () => (document.body.style.overflow = 'auto');
   }, [isOpen]);
@@ -151,6 +158,7 @@ const AuthModal = ({ isOpen, onClose }) => {
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
               placeholder="you@example.com"
               required
+              autoComplete="off"
             />
           </div>
           <div>
@@ -163,6 +171,7 @@ const AuthModal = ({ isOpen, onClose }) => {
               placeholder="••••••••"
               required
               minLength={6}
+              autoComplete="off"
             />
           </div>
           <button
