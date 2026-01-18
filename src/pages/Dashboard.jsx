@@ -1,13 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import DashboardNavbar from '../../components/DashboardNavbar.jsx';
 import SearchBar from '../../components/SearchBar.jsx';
 import PropertyFilters from '../../components/PropertyFilters.jsx';
 import PropertyCard from '../../components/PropertyCard.jsx';
 import Pagination from '../../components/Pagination.jsx';
-import { properties } from '../data/properties.js';
 import { applySearchAndFilters } from '../utils/searchHelpers.js';
+import { propertyService } from '../services/propertyService.js';
+import { likeService } from '../services/likeService.js';
 
 const Dashboard = () => {
+  const [properties, setProperties] = useState([]);
+  const [likedPropertyIds, setLikedPropertyIds] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     priceRange: { min: null, max: null },
@@ -19,6 +23,47 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(9);
   const [sortBy, setSortBy] = useState('newest');
+
+  // Fetch properties from backend
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await propertyService.getProperties(1, filters);
+        setProperties(response.properties || []);
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+        setProperties([]);
+      }
+    };
+
+    const fetchLikedProperties = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const result = await likeService.checkLikedProperties();
+        setLikedPropertyIds(result.liked_properties || []);
+      } catch (error) {
+        console.error('Error fetching liked properties:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+    fetchLikedProperties();
+  }, []);
+
+  const handleLikesChange = async () => {
+    try {
+      const result = await likeService.checkLikedProperties();
+      setLikedPropertyIds(result.liked_properties || []);
+    } catch (error) {
+      console.error('Error updating liked properties:', error);
+    }
+  };
 
   // Apply search and filters
   const filteredProperties = useMemo(() => {
@@ -43,7 +88,7 @@ const Dashboard = () => {
     }
     
     return results;
-  }, [searchQuery, filters, sortBy]);
+  }, [searchQuery, filters, sortBy, properties]);
 
   // Pagination logic
   const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
@@ -73,6 +118,31 @@ const Dashboard = () => {
     setCurrentPage(1);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <DashboardNavbar />
+        <div className="container mx-auto px-6 md:px-20 lg:px-32 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="bg-white rounded-xl shadow animate-pulse">
+                <div className="h-56 bg-gray-200"></div>
+                <div className="p-5">
+                  <div className="h-6 bg-gray-200 mb-3 w-3/4"></div>
+                  <div className="h-4 bg-gray-200 mb-4 w-1/2"></div>
+                  <div className="flex gap-2">
+                    <div className="h-4 bg-gray-200 flex-1"></div>
+                    <div className="h-4 bg-gray-200 flex-1"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardNavbar />
@@ -81,7 +151,7 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Find Your Dream Property</h1>
-          <p className="text-gray-600">Explore {properties.length} premium properties across India</p>
+          <p className="text-gray-600">Explore premium properties across India</p>
         </div>
 
         {/* Search Bar */}
@@ -145,7 +215,12 @@ const Dashboard = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {currentProperties.map((property) => (
-                    <PropertyCard key={property.id} property={property} />
+                    <PropertyCard 
+                      key={property.id} 
+                      property={property}
+                      isLiked={likedPropertyIds.includes(property.id)}
+                      onLikesChange={handleLikesChange}
+                    />
                   ))}
                 </div>
                 

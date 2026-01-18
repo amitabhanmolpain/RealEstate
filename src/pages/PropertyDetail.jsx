@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { properties } from '../data/properties.js';
 import DashboardNavbar from '../../components/DashboardNavbar.jsx';
 import PropertyMap from '../../components/PropertyMap.jsx';
 import EMICalculator from '../../components/EMICalculator.jsx';
+import { propertyService } from '../services/propertyService.js';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -22,12 +22,21 @@ const PropertyDetail = () => {
   ];
 
   useEffect(() => {
-    const foundProperty = properties.find(p => p.id === parseInt(id));
-    if (foundProperty) {
-      setProperty(foundProperty);
-    } else {
-      navigate('/dashboard');
-    }
+    const fetchProperty = async () => {
+      try {
+        const response = await propertyService.getPropertyById(id);
+        if (response && response.property) {
+          setProperty(response.property);
+        } else {
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error fetching property:', error);
+        navigate('/dashboard');
+      }
+    };
+    
+    fetchProperty();
   }, [id, navigate]);
 
   if (!property) {

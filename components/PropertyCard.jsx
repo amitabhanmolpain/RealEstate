@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { likeService } from '../src/services/likeService';
+import { useAuth } from '../src/contexts/AuthContext';
 
-const PropertyCard = ({ property }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+const PropertyCard = ({ property, isLiked: initialIsLiked = false, onLikesChange }) => {
+  const [isFavorite, setIsFavorite] = useState(initialIsLiked);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const formatPrice = (price) => {
     if (price >= 10000000) {
@@ -23,9 +27,32 @@ const PropertyCard = ({ property }) => {
     navigate(`/property/${property.id}`);
   };
 
-  const handleFavoriteClick = (e) => {
+  const handleFavoriteClick = async (e) => {
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    
+    if (!user) {
+      navigate('/');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isFavorite) {
+        await likeService.unlikeProperty(property.id);
+      } else {
+        await likeService.likeProperty(property.id);
+      }
+      setIsFavorite(!isFavorite);
+      
+      if (onLikesChange) {
+        onLikesChange();
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Failed to update favorite. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -64,10 +91,11 @@ const PropertyCard = ({ property }) => {
         <div className="absolute top-3 right-3 flex gap-2">
           <button
             onClick={handleFavoriteClick}
-            className="bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition"
+            disabled={isLoading}
+            className="bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition disabled:opacity-50"
           >
             <svg
-              className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'fill-none text-gray-700'}`}
+              className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'fill-none text-gray-700'} ${isLoading ? 'opacity-50' : ''}`}
               stroke="currentColor"
               viewBox="0 0 24 24"
             >

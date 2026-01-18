@@ -11,6 +11,8 @@ import AuthModal from '../components/AuthModal.jsx'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Dashboard from './pages/Dashboard.jsx'
 import PropertyDetail from './pages/PropertyDetail.jsx'
+import Interests from './pages/Interests.jsx'
+import AddProperty from './pages/AddProperty.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 
@@ -41,6 +43,16 @@ const App = () => {
           <Route path='/property/:id' element={
             <ProtectedRoute>
               <PropertyDetail />
+            </ProtectedRoute>
+          } />
+          <Route path='/interests' element={
+            <ProtectedRoute>
+              <Interests />
+            </ProtectedRoute>
+          } />
+          <Route path='/add-property' element={
+            <ProtectedRoute>
+              <AddProperty />
             </ProtectedRoute>
           } />
         </Routes>
