@@ -8,67 +8,37 @@ const DashboardNavbar = () => {
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Debug logging
-  console.log('DashboardNavbar - User state:', user);
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Don't close if clicking on dropdown buttons
-      if (event.target.closest('.dropdown-menu')) {
-        return;
-      }
-      
-      if (showDropdown && !event.target.closest('.dropdown-container')) {
-        console.log('Clicking outside dropdown, closing...');
+      const container = document.querySelector('.dropdown-container');
+      if (container && !container.contains(event.target)) {
         setShowDropdown(false);
       }
     };
     
     if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 0);
     }
     
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, [showDropdown]);
 
-  const handleSignOut = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Test alert to confirm click is registering
-    alert('Sign out button clicked - check console for details');
-    
-    console.log('Dashboard sign out clicked');
-    console.log('Current user before sign out:', user);
-    console.log('SignOut function available:', typeof signOut);
-    
-    setShowDropdown(false); // Close dropdown immediately
-    
+  const handleSignOut = async () => {
     try {
-      console.log('Attempting to sign out...');
-      const result = await signOut();
-      console.log('Firebase signOut result:', result);
-      console.log('Sign out completed successfully');
-      
-      // Force a small delay to ensure Firebase auth state updates
+      await signOut();
+      setShowDropdown(false);
       setTimeout(() => {
-        console.log('Navigating to home page...');
         navigate('/', { replace: true });
-        // Force page reload to ensure clean state
-        window.location.reload();
       }, 100);
-      
     } catch (error) {
       console.error('Error signing out:', error);
-      alert('Error signing out: ' + error.message);
     }
   };
 
-  const handleDashboardClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('Dashboard button clicked');
+  const handleDashboardClick = () => {
     setShowDropdown(false);
     navigate('/dashboard');
   };
@@ -94,7 +64,6 @@ const DashboardNavbar = () => {
           <div className="relative dropdown-container">
             <button
               onClick={() => {
-                console.log('Dashboard user icon clicked, current dropdown state:', showDropdown);
                 setShowDropdown(!showDropdown);
               }}
               className="flex items-center gap-2 hover:bg-gray-50 rounded-full px-3 py-2 transition"
@@ -113,8 +82,7 @@ const DashboardNavbar = () => {
             {/* Dropdown Menu */}
             {showDropdown && (
               <div 
-                className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border z-[9999] dropdown-menu"
-                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border z-[9999]"
               >
                 <div className="px-4 py-3 border-b">
                   <p className="font-medium text-gray-900">{user?.displayName || 'User'}</p>

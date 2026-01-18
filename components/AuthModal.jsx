@@ -3,7 +3,7 @@ import { useAuth } from '../src/contexts/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 
 const AuthModal = ({ isOpen, onClose }) => {
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
+  const { signInWithEmail, signUpWithEmail } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState('signup'); // 'signup' | 'signin'
   const [email, setEmail] = useState('');
@@ -44,9 +44,7 @@ const AuthModal = ({ isOpen, onClose }) => {
     setError('');
     setLoading(true);
     try {
-  await signInWithGoogle();
-  onClose();
-  navigate('/dashboard');
+  alert('Google sign-in has been disabled');
     } catch (err) {
       setError(err?.message || 'Google sign-in failed');
     } finally {
