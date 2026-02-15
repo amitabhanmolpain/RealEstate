@@ -10,7 +10,7 @@ from app.controllers.likes_controller import (
 likes_bp = Blueprint("likes", __name__)
 
 
-@likes_bp.route("/likes/properties/<property_id>", methods=["POST", "OPTIONS"])
+@likes_bp.route("/likes/properties/<property_id>", methods=["POST"])
 @jwt_required()
 def like_property_route(property_id):
     """Like a property."""
@@ -19,7 +19,7 @@ def like_property_route(property_id):
     return jsonify(result), status
 
 
-@likes_bp.route("/likes/properties/<property_id>", methods=["DELETE", "OPTIONS"])
+@likes_bp.route("/likes/properties/<property_id>", methods=["DELETE"])
 @jwt_required()
 def unlike_property_route(property_id):
     """Unlike a property."""
@@ -28,7 +28,7 @@ def unlike_property_route(property_id):
     return jsonify(result), status
 
 
-@likes_bp.route("/likes/properties", methods=["GET", "OPTIONS"])
+@likes_bp.route("/likes/properties", methods=["GET"])
 @jwt_required()
 def user_liked_properties_route():
     """Get all properties liked by user."""
@@ -38,7 +38,7 @@ def user_liked_properties_route():
     return jsonify(result), status
 
 
-@likes_bp.route("/likes/check", methods=["GET", "OPTIONS"])
+@likes_bp.route("/likes/check", methods=["GET"])
 @jwt_required()
 def check_liked_properties_route():
     """Get list of liked property IDs."""
