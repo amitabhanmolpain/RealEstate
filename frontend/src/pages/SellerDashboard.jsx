@@ -96,6 +96,15 @@ const SellerDashboard = () => {
     );
   }
 
+  const formatPrice = (price) => {
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(2)} Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(2)} L`;
+    }
+    return `₹${price.toLocaleString('en-IN')}`;
+  };
+
   const StatCard = ({ icon, label, value, color }) => (
     <div className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4">
       <div className={`w-14 h-14 rounded-full ${color} flex items-center justify-center`}>
@@ -263,7 +272,7 @@ const SellerDashboard = () => {
                             <h3 className="font-medium text-gray-800">{property.title}</h3>
                             <p className="text-sm text-gray-500">{property.location}</p>
                             <p className="text-sm font-medium text-red-400">
-                              ${(property.price || 0).toLocaleString()}
+                              {formatPrice(property.price || 0)}
                             </p>
                           </div>
                         </div>

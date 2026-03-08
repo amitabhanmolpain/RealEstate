@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FiTrash2 } from 'react-icons/fi';
 import DashboardNavbar from '../../components/DashboardNavbar.jsx';
 import PropertyCard from '../../components/PropertyCard.jsx';
 import Pagination from '../../components/Pagination.jsx';
@@ -95,9 +96,10 @@ const Interests = () => {
                   />
                   <button
                     onClick={() => handleRemoveFromInterests(property.id)}
-                    className="absolute top-2 right-2 bg-red-400 hover:bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full transition"
+                    className="absolute top-2 right-2 bg-red-400 hover:bg-red-500 text-white p-2 rounded-full transition flex items-center justify-center"
+                    title="Remove from interests"
                   >
-                    Remove
+                    <FiTrash2 size={18} />
                   </button>
                 </div>
               ))}

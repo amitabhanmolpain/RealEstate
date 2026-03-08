@@ -5,7 +5,7 @@ import { likeService } from '../src/services/likeService';
 
 const DashboardNavbar = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [interestsCount, setInterestsCount] = useState(0);
 
   useEffect(() => {
@@ -35,8 +35,8 @@ const DashboardNavbar = () => {
     return () => clearInterval(interval);
   }, [user]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
