@@ -12,7 +12,7 @@ export const searchProperties = (properties, query) => {
       property.title.toLowerCase().includes(lowerQuery) ||
       property.location.toLowerCase().includes(lowerQuery) ||
       property.city.toLowerCase().includes(lowerQuery) ||
-      property.type.toLowerCase().includes(lowerQuery) ||
+      (property.property_type && property.property_type.toLowerCase().includes(lowerQuery)) ||
       property.description.toLowerCase().includes(lowerQuery)
     );
   });
@@ -39,7 +39,7 @@ export const filterProperties = (properties, filters) => {
     }
 
     // Property type filter
-    if (filters.type && property.type !== filters.type) {
+    if (filters.type && property.property_type !== filters.type) {
       return false;
     }
 

@@ -15,9 +15,9 @@ export const propertyService = {
       const params = new URLSearchParams({ page });
       
       if (filters.city) params.append('city', filters.city);
-      if (filters.type) params.append('type', filters.type);
-      if (filters.minPrice) params.append('minPrice', filters.minPrice);
-      if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+      if (filters.type) params.append('property_type', filters.type);
+      if (filters.minPrice) params.append('min_price', filters.minPrice);
+      if (filters.maxPrice) params.append('max_price', filters.maxPrice);
       
       const response = await fetch(`${API_BASE_URL}/properties?${params}`, {
         method: 'GET',

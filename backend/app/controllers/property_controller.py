@@ -7,6 +7,9 @@ ITEMS_PER_PAGE = 12
 
 def _serialize_property(prop):
     """Convert Property document to JSON-serializable dict."""
+    # Handle both updated_at and updated_date field names for backward compatibility
+    updated_field = getattr(prop, 'updated_at', None) or getattr(prop, 'updated_date', None)
+    
     return {
         "id": str(prop.id),
         "title": prop.title,
@@ -43,7 +46,7 @@ def get_all_properties(page=1, city=None, property_type=None, min_price=None, ma
     skip = (page - 1) * ITEMS_PER_PAGE
     
     # Build filter query
-    query = Property.objects(available=True)
+    query = Property.objects()
     
     if city:
         query = query(city=city)

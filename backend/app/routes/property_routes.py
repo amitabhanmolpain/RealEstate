@@ -18,9 +18,9 @@ class Properties(Resource):
         """Get paginated properties with optional filters."""
         page = request.args.get("page", 1, type=int)
         city = request.args.get("city", type=str)
-        property_type = request.args.get("type", type=str)
-        min_price = request.args.get("minPrice", type=int)
-        max_price = request.args.get("maxPrice", type=int)
+        property_type = request.args.get("property_type", type=str)
+        min_price = request.args.get("min_price", type=int)
+        max_price = request.args.get("max_price", type=int)
         
         result = get_all_properties(
             page=page,

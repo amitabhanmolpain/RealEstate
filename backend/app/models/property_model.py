@@ -43,12 +43,13 @@ class Property(Document):
     
     # Dates
     posted_date = DateTimeField(default=datetime.utcnow)
-    updated_date = DateTimeField(default=datetime.utcnow)
+    updated_at = DateTimeField(default=datetime.utcnow)
     created_at = DateTimeField(default=datetime.utcnow)
     
     meta = {
         'collection': 'properties',
-        'indexes': ['city', 'property_type', 'posted_date', 'featured', 'seller_id']
+        'indexes': ['city', 'property_type', 'posted_date', 'featured', 'seller_id'],
+        'strict': False,  # Allow extra fields in documents
     }
 
 
