@@ -4,6 +4,7 @@ import SearchBar from '../../components/SearchBar.jsx';
 import PropertyFilters from '../../components/PropertyFilters.jsx';
 import PropertyCard from '../../components/PropertyCard.jsx';
 import Pagination from '../../components/Pagination.jsx';
+import RecommendationsSection from '../../components/RecommendationsSection.jsx';
 import { applySearchAndFilters } from '../utils/searchHelpers.js';
 import { propertyService } from '../services/propertyService.js';
 import { likeService } from '../services/likeService.js';
@@ -252,6 +253,11 @@ const Dashboard = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Recommendations Section */}
+      <div className="container mx-auto px-6 md:px-20 lg:px-32">
+        <RecommendationsSection />
       </div>
     </div>
   );

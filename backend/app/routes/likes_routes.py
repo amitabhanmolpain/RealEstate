@@ -5,6 +5,7 @@ from app.controllers.likes_controller import (
     unlike_property,
     get_user_liked_properties,
     check_liked_properties,
+    get_recommendations,
 )
 
 likes_bp = Blueprint("likes", __name__)
@@ -44,4 +45,14 @@ def check_liked_properties_route():
     """Get list of liked property IDs."""
     user_id = get_jwt_identity()
     result, status = check_liked_properties(user_id)
+    return jsonify(result), status
+
+
+@likes_bp.route("/recommendations", methods=["GET"])
+@jwt_required()
+def get_recommendations_route():
+    """Get personalized property recommendations for user."""
+    user_id = get_jwt_identity()
+    page = request.args.get("page", 1, type=int)
+    result, status = get_recommendations(user_id, page)
     return jsonify(result), status
