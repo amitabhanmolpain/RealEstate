@@ -30,7 +30,11 @@ const Dashboard = () => {
     const fetchProperties = async () => {
       try {
         const response = await propertyService.getProperties(1, filters);
-        setProperties(response.properties || []);
+        const validProperties = (response.properties || []).filter((property) => {
+          const image = typeof property.image === 'string' ? property.image.trim() : '';
+          return image && !['null', 'undefined', 'none'].includes(image.toLowerCase());
+        });
+        setProperties(validProperties);
       } catch (error) {
         console.error('Error fetching properties:', error);
         setProperties([]);
