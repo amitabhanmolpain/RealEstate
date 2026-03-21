@@ -45,12 +45,12 @@ def like_property(user_id, property_id):
             if recommendation_service_available:
                 try:
                     generate_recommendations_for_like({
-                        user_id=str(user_id),
-                        property_id=str(prop_id),
-                        property_title=prop.title,
-                        property_type=prop.property_type,
-                        location=prop.location,
-                        price=prop.price
+                        "user_id": str(user_id),
+                        "property_id": str(prop_id),
+                        "property_title": prop.title,
+                        "property_type": prop.property_type,
+                        "location": prop.location,
+                        "price": prop.price,
                     })
                     logger.info(f"Generated recommendations for property: {prop.title}")
                 except Exception as e:
