@@ -3,7 +3,7 @@
  * Handles API calls for fetching personalized property recommendations
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://15.207.72.206:5000';
 
 /**
  * Fetch recommendations for the current user
