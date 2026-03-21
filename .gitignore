@@ -106,7 +106,7 @@ coverage.xml
 *.temp
 
 
-download.pem
+*.pem
 
 
 
