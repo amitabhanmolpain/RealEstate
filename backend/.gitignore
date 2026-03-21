@@ -142,3 +142,7 @@ logs/
 # OS generated files
 Thumbs.db
 .DS_Store
+
+
+#AWS
+.pem

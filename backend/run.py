@@ -4,7 +4,11 @@ Real Estate API Entry Point
 
 For Production (AWS EC2):
     Use Gunicorn to run the app:
-    gunicorn -w 4 -b 0.0.0.0:5000 app:app
+    gunicorn -w 4 -b 0.0.0.0:5000 run:app
+
+For Production (Windows):
+    Use Waitress to run the app:
+    waitress-serve --listen=0.0.0.0:5000 run:app
 
 For Development:
     python run.py
@@ -60,7 +64,9 @@ if __name__ == "__main__":
         logger.warning(
             "Running in DEVELOPMENT mode.\n"
             "For production deployment on EC2, use:\n"
-            "  gunicorn -w 4 -b 0.0.0.0:5000 app:app"
+            "  gunicorn -w 4 -b 0.0.0.0:5000 run:app\n"
+            "For Windows, use:\n"
+            "  waitress-serve --listen=0.0.0.0:5000 run:app"
         )
     
     # Run development server
